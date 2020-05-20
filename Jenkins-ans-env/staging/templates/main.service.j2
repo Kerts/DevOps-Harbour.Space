@@ -1,0 +1,11 @@
+[Unit]
+Description=GO
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/home/vagrant/main
+PIDFile=/var/run/simple
+
+[Install]
+WantedBy=default.target

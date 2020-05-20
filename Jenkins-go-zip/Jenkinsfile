@@ -1,0 +1,25 @@
+pipeline {
+    agent any
+
+    tools {
+        go { 'go-1.14' }
+    }
+
+    stages {
+	stage('Build1') {
+            steps {
+                sh  'go build'
+            }
+        }
+        stage('Build2') {
+	    steps {
+                sh  'tar czvf example3.tar.gz *.go' 
+	    }
+	}
+        stage('Publish artifact') {
+            steps {
+                archiveArtifacts 'example3.tar.gz'
+            }
+	}
+    }
+}

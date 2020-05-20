@@ -1,0 +1,38 @@
+pipeline {
+  environment {
+    registry = "kerts/exame-devops"
+    registryCredential = 'dockerhub'
+    dockerImage = ''
+  }
+  agent any
+  stages {
+    stage('Cloning Git') {
+      steps {
+        git 'https://github.com/Kerts/exame-devops.git'
+      }
+    }
+    stage('Building image') {
+      steps{
+        script {
+          dockerImage = docker.build registry + ":$BUILD_NUMBER"
+        }
+      }
+    }
+    stage('Deploy Image') {
+      steps{
+        script {
+          docker.withRegistry( '', registryCredential ) {
+            dockerImage.push("latest")
+          }
+        }
+      }
+    }
+    stage('Docker run after restart') {
+      steps{
+        sshagent (credentials: ['toolbox-key']) {
+          sh "ssh vagrant@10.10.50.4 docker run -d --restart unless-stopped -p 9191:9009 kerts/exame-devops"
+        }
+      }
+    }
+  }
+}

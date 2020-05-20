@@ -1,0 +1,23 @@
+pipeline {
+  agent any
+
+  parameters { 
+    choice(name: 'TARGET_ENV', choices: ['staging', 'production'], description: 'Pick env for deploy')
+  }
+
+  stages {
+    stage('Copy artifact') {
+      steps {
+        copyArtifacts filter: 'main', fingerprintArtifacts: true, projectName: 'go_repo', selector: lastSuccessful()
+      }
+    }
+    stage('Deliver') {
+      steps {
+	    ansiblePlaybook credentialsId: 'toolbox-key',
+        inventory: "inventories/${params.TARGET_ENV}/hosts.ini",
+        playbook: 'playbook.yml',
+        disableHostKeyChecking: true
+      }
+    }
+  }
+}

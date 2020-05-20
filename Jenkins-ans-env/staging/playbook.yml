@@ -1,0 +1,20 @@
+- hosts: all
+  tasks:
+    - name: create service template
+      become: yes
+      template:
+        src: main.service.j2
+        dest: /etc/systemd/system/main.service
+
+    - name: copy artifact
+      copy:
+        src: main
+        dest: /home/vagrant/main
+        mode: '0777'
+
+    - name: enable and start service
+      become: yes
+      systemd:
+        name: main
+        enabled: yes
+        state: restarted

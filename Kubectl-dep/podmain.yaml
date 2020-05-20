@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: main
+  name: main
+spec:
+  containers:
+  - image: kerts/docker-test
+    imagePullPolicy: Always
+    name: main

@@ -1,0 +1,42 @@
+pipeline {
+   agent any
+
+   tools {
+    go { 'go-1.14' }
+   }
+
+   stages {
+      stage('Build') {
+         steps {
+           sh 'GOOS=linux go build main.go'
+           sh 'zip main.zip main'
+         }
+      }
+      stage('Deleting old name') {
+        steps {
+          withAWS(credentials: 'aws-credentials', region: 'eu-central-1') {
+            sh '/usr/local/bin/aws lambda delete-function --function-name myMain-go'
+          }
+        }
+      }
+      stage('Deploy') {
+        steps {
+          withAWS(credentials: 'aws-credentials', region: 'eu-central-1') {
+            sh '/usr/local/bin/aws lambda create-function --function-name myMain-go --zip-file fileb://main.zip --handler main --runtime go1.x --role "arn:aws:iam::484653643807:role/service-role/myLambdafunction-role-cfq4ntdb"'
+          }
+        }
+      }
+      stage('Update') {
+        steps {
+          withAWS(credentials: 'aws-credentials', region: 'eu-central-1') {
+            sh '/usr/local/bin/aws lambda update-function-code --function-name myMain-go --zip-file fileb://main.zip'
+          }
+        }
+      }
+      stage('Publish artifact') {
+         steps {
+           archiveArtifacts 'main.zip'
+         }
+      }
+   }
+}

@@ -1,0 +1,43 @@
+{
+	"info": {
+		"_postman_id": "56fa7608-a907-44ae-99f7-1c27607b6a86",
+		"name": "ssh target",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "10.10.50.3:9090",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "938f96b4-de19-4f98-a2f4-2f0bcf436c27",
+						"exec": [
+							"pm.test(\"Check the Name\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.Name).to.eql(\"Hello Kirill\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "10.10.50.3:9090",
+					"host": [
+						"10",
+						"10",
+						"50",
+						"3"
+					],
+					"port": "9090"
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}

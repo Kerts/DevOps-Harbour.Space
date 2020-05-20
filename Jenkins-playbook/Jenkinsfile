@@ -1,0 +1,16 @@
+pipeline {
+  agent any
+
+  stages {
+    stage('Copy artifact') {
+      steps {
+        copyArtifacts filter: 'main', fingerprintArtifacts: true, projectName: 'go_repo', selector: lastSuccessful()
+      }
+    }
+    stage('Deliver') {
+      steps {
+	ansiblePlaybook credentialsId: 'toolbox-key', inventory: 'hosts.ini', playbook: 'playbook.yml'
+      }
+    }
+  }
+}

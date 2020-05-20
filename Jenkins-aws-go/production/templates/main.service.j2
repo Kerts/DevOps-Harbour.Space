@@ -1,0 +1,11 @@
+[Unit]
+Description=GO
+After=network.target
+
+[Service]
+Type=simple
+ExecStart={{home_folder}}/main
+PIDFile=/var/run/simple
+
+[Install]
+WantedBy=default.target

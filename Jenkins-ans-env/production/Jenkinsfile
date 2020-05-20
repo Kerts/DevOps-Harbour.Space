@@ -1,0 +1,56 @@
+pipeline {
+  agent any
+
+  parameters {
+    gitParameter branchFilter: 'origin/(.*)', defaultValue: 'production', name: 'BRANCH', type: 'PT_BRANCH', listSize: '0'
+  }
+
+  stages {
+    stage("Initialization") {
+      steps {
+        buildDescription "Executed: ${BRANCH}"
+      }
+    }
+    stage('Copy artifact') {
+      steps {
+        copyArtifacts filter: 'main', fingerprintArtifacts: true, projectName: 'go_repo', selector: lastSuccessful()
+      }
+    }
+    stage('Deliver staging/production') {
+      steps {
+        script {
+          if (env.BRANCH == 'staging') {
+            ansiblePlaybook credentialsId: 'toolbox-key',
+            inventory: "inventories/staging/hosts.ini",
+            playbook: 'playbook.yml',
+            disableHostKeyChecking: true
+          } else {
+            ansiblePlaybook credentialsId: 'toolbox-key',
+            inventory: "inventories/production/hosts.ini",
+            playbook: 'playbook.yml',
+            disableHostKeyChecking: true
+          }
+        }
+      }
+    }
+    stage('Integration Test') {
+      agent {
+        docker {
+          image 'postman/newman'
+          args '--entrypoint='
+        }
+      }
+      steps {
+        script {
+          if (env.BRANCH == 'staging') {
+            sh 'newman run inventories/staging/staging.json'
+            echo "STAGING"
+          } else {
+            sh 'newman run inventories/production/production.json'
+            echo "PRODUCTION"
+          }
+        }
+      }
+    }
+  }
+}

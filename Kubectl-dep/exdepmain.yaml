@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: exdepmain
+  name: exdepmain
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: exdepmain
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: exdepmain
+    spec:
+      containers:
+      - image: kerts/docker-test
+        imagePullPolicy: Always
+        name: docker-test

@@ -1,0 +1,43 @@
+{
+	"info": {
+		"_postman_id": "3a1f22d1-2c14-4d4e-86ac-752eaf6aefb2",
+		"name": "ssh k8s",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "10.10.50.4:8888",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ee5e34ad-2a96-41f7-b608-cb0413f2c421",
+						"exec": [
+							"pm.test(\"Check the Name\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.Name).to.eql(\"Hello Kirill\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "10.10.50.4:8888",
+					"host": [
+						"10",
+						"10",
+						"50",
+						"4"
+					],
+					"port": "8888"
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}

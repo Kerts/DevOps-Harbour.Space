@@ -1,0 +1,62 @@
+pipeline {
+  agent any
+
+  parameters { 
+    gitParameter branchFilter: 'origin/(.*)', defaultValue: 'master', name: 'BRANCH', type: 'PT_BRANCH', listSize: '0'
+  }
+
+  stages {
+    stage('Copy artifact') {
+      steps {
+        copyArtifacts filter: 'main', fingerprintArtifacts: true, projectName: 'go_repo', selector: lastSuccessful()
+      }
+    }
+    
+    stage('Deliver staging') {
+      when {
+        expression { params.BRANCH == 'develop' }
+      }
+      steps {
+	    ansiblePlaybook credentialsId: 'toolbox-key',
+        inventory: "inventories/staging/hosts.ini",
+        playbook: 'playbook.yml',
+        disableHostKeyChecking: true
+      }
+    }
+    stage('Deliver production') {
+      when {
+        expression { params.BRANCH == 'master' }
+      }
+      steps {
+        ansiblePlaybook credentialsId: 'toolbox-key',
+        inventory: "inventories/production/hosts.ini",
+        playbook: 'playbook.yml',
+        disableHostKeyChecking: true
+      }
+    }
+    stage('Integration test production') {
+      agent {
+        docker { 
+          image 'postman/newman'
+          args '--entrypoint='
+        }
+      }
+      when {
+        expression { params.BRANCH == 'master' }
+      }
+      steps {sh 'newman run "https://www.getpostman.com/collections/ecbf1c307f8a32837444"'}
+    }
+     stage('Integration test staging') {
+       agent {
+         docker {
+           image 'postman/newman'
+           args '--entrypoint='
+         }
+       }
+       when {
+         expression { params.BRANCH == 'develop' }
+       }
+       steps {sh 'newman run "https://www.getpostman.com/collections/8eed24931171c5e023d8"'}
+     }
+  }
+}

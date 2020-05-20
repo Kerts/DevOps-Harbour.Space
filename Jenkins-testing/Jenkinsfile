@@ -1,0 +1,25 @@
+pipeline {
+   agent any
+
+   tools {
+    go { 'go-1.14' }
+   }
+
+   stages {
+      stage('Test') {
+         steps {
+           sh 'go test'
+         }
+      }
+      stage('Build main') {
+         steps {
+           sh 'go build main.go'
+         }
+      }
+      stage('Publish artifact') {
+         steps {
+           archiveArtifacts 'main'
+         }
+      }
+   }
+}
